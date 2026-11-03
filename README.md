@@ -1,38 +1,22 @@
 # EG-System ERP
 
-نظام تخطيط موارد المؤسسات (ERP) لمصنع **المصرية الألمانية لتصنيع منتجات WPC & PVC** — جمصة، الدقهلية.
+Frontend-only React ERP for **المصرية الألمانية لتصنيع منتجات WPC & PVC** — Gamasa, Dakahlia.
 
-Internal ERP for the Egyptian-German WPC & PVC manufacturing plant (Gamasa, Dakahlia).
+One repository · one Vite app · feature-based Clean Architecture · Docker SPA deploy.
 
-## Modules
+## Quick start
 
-| Module | Arabic | Purpose |
-|--------|--------|---------|
-| Dashboard | لوحة التحكم | KPIs, open orders, production, activity |
-| Products | المنتجات | SKU master (doors, cladding, foam, accessories) |
-| Inventory | المخزون | Warehouses FG / RM / WIP, stock & reservations |
-| Sales | المبيعات | Sales orders, line items, payment status |
-| Production | الإنتاج | Work orders & line progress |
-| Customers | العملاء والموزعين | Dealers, contractors, retail |
-| Suppliers | الموردين | Raw materials & accessories vendors |
-| Purchases | المشتريات | Purchase orders |
-| HR | الموارد البشرية | Employees by department |
-| Finance | المالية | Receivables, payables, cash, month sales |
-| Settings | الإعدادات | Company profile & language |
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
 
-## Company context baked into seed data
-
-- Plant: Gamasa Industrial Zone Phase 3
-- Hotline: `15536` · Phone: `+201555515536` · Email: `contact@egerman-upvc.com`
-- Product lines: WPC doors (D134 / D132), WPC cladding 16×280, PVC foam boards, door accessory kits
-- Sample dealer: Al-Adas (Oman)
-
-## Stack
-
-- React + Vite
-- React Router
-- Local seed data (frontend prototype — ready to wire to a real API/DB later)
-- Bilingual Arabic (RTL) / English
+```bash
+npm run build
+npm run preview
+npm run lint
+```
 
 ## Demo login
 
@@ -41,14 +25,52 @@ admin@egerman-upvc.com / admin123
 sales@egerman-upvc.com / sales123
 ```
 
-## Run
+## Architecture
 
-```bash
-npm install
-npm run dev
+```
+src/app        → router, providers, layouts, config
+src/features   → auth, dashboard, sales, inventory, …
+src/shared     → components, services, utils
 ```
 
+See:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/FEATURE_DEVELOPMENT.md](docs/FEATURE_DEVELOPMENT.md)
+- [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md)
+- [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
+- [docs/DOMAINS.md](docs/DOMAINS.md)
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+## Modules
+
+| Module | Routes |
+|--------|--------|
+| Auth | `/login` |
+| Dashboard | `/` |
+| Inventory / Products | `/inventory`, `/products` |
+| Sales / Customers | `/sales`, `/customers` |
+| Production | `/production` |
+| Purchasing | `/purchases`, `/suppliers` |
+| Finance | `/finance` |
+| HR | `/hr` |
+| Users / Settings | `/settings` |
+
+## Subdomains
+
+Same build on `app.`, `sales.`, `production.`, `warehouse.`, `finance.`, `hr.` + `VITE_BASE_DOMAIN`.
+
+## Docker (frontend only)
+
 ```bash
-npm run build
-npm run preview
+docker compose up -d --build
 ```
+
+Opens on `http://localhost:8080` by default (`WEB_PORT`).
+
+## Stack
+
+- React 19 + Vite 8
+- React Router 7
+- Local seed data (prototype) + configurable external API URL
+- Bilingual Arabic (RTL) / English

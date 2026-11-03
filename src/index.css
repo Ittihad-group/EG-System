@@ -695,3 +695,9 @@ html[dir='ltr'] .sidebar-nav a.active {
     display: none;
   }
 }
+
+.page-fallback {
+  padding: 2rem;
+  text-align: center;
+  opacity: 0.7;
+}

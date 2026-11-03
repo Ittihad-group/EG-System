@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_BASE_DOMAIN: ${VITE_BASE_DOMAIN:-localhost}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_APP_ENV: ${VITE_APP_ENV:-production}
+    image: eg-system-web:latest
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    restart: unless-stopped
