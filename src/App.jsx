@@ -1,30 +1,41 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { LanguageProvider } from './context/LanguageContext'
-import Layout from './components/Layout'
-import Home from './pages/Home'
-import About from './pages/About'
-import Services from './pages/Services'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AppProvider } from './context/AppContext'
+import AppLayout from './layouts/AppLayout'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
-import Careers from './pages/Careers'
-import News from './pages/News'
-import Contact from './pages/Contact'
+import Inventory from './pages/Inventory'
+import Sales from './pages/Sales'
+import Production from './pages/Production'
+import Customers from './pages/Customers'
+import Suppliers from './pages/Suppliers'
+import Purchases from './pages/Purchases'
+import HR from './pages/HR'
+import Finance from './pages/Finance'
+import Settings from './pages/Settings'
 
 export default function App() {
   return (
-    <LanguageProvider>
+    <AppProvider>
       <BrowserRouter>
         <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="services" element={<Services />} />
+          <Route path="/login" element={<Login />} />
+          <Route element={<AppLayout />}>
+            <Route index element={<Dashboard />} />
             <Route path="products" element={<Products />} />
-            <Route path="careers" element={<Careers />} />
-            <Route path="news" element={<News />} />
-            <Route path="contact" element={<Contact />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="sales" element={<Sales />} />
+            <Route path="production" element={<Production />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="suppliers" element={<Suppliers />} />
+            <Route path="purchases" element={<Purchases />} />
+            <Route path="hr" element={<HR />} />
+            <Route path="finance" element={<Finance />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </LanguageProvider>
+    </AppProvider>
   )
 }

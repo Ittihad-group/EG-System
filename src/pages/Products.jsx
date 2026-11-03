@@ -1,48 +1,66 @@
-import { company, labels, products } from '../data/content'
-import { useLang } from '../context/LanguageContext'
-import PageHero from '../components/PageHero'
+import { useMemo, useState } from 'react'
+import PageHeader from '../components/PageHeader'
+import DataTable from '../components/DataTable'
+import { useApp } from '../context/AppContext'
 
 export default function Products() {
-  const { t } = useLang()
+  const { t, money, data } = useApp()
+  const [q, setQ] = useState('')
+
+  const catMap = Object.fromEntries(data.categories.map((c) => [c.id, c]))
+
+  const rows = useMemo(() => {
+    const term = q.trim().toLowerCase()
+    return data.products.filter((p) => {
+      if (!term) return true
+      return (
+        p.sku.toLowerCase().includes(term) ||
+        t(p.name).toLowerCase().includes(term) ||
+        t(catMap[p.categoryId]?.name || {}).toLowerCase().includes(term)
+      )
+    })
+  }, [q, data.products, t])
+
+  const columns = [
+    { key: 'sku', label: t('sku'), render: (r) => <code>{r.sku}</code> },
+    { key: 'name', label: t('name'), render: (r) => t(r.name) },
+    {
+      key: 'category',
+      label: t('category'),
+      render: (r) => t(catMap[r.categoryId]?.name || {}),
+    },
+    { key: 'uom', label: t('uom'), render: (r) => t(r.uom) },
+    { key: 'price', label: t('price'), render: (r) => money(r.priceExVat) },
+    { key: 'cost', label: t('cost'), render: (r) => money(r.cost) },
+    {
+      key: 'widths',
+      label: t('widths'),
+      render: (r) => (r.widthsCm?.length ? r.widthsCm.join(' / ') : '—'),
+    },
+    {
+      key: 'colors',
+      label: t('colors'),
+      render: (r) => (r.colors?.length ? r.colors.slice(0, 4).join(', ') + (r.colors.length > 4 ? '…' : '') : '—'),
+    },
+  ]
 
   return (
-    <>
-      <PageHero
-        title={t(labels.products)}
-        subtitle={t({
-          ar: 'أبواب WPC & PVC، تجاليد بديل الخشب، وألواح الفوم بورد',
-          en: 'WPC & PVC doors, wood-alternative cladding, and foam boards',
-        })}
+    <div>
+      <PageHeader
+        title={t('products')}
+        subtitle={t(data.company.name)}
+        actions={
+          <input
+            className="search-input"
+            placeholder={t('search')}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        }
       />
-      <section className="section">
-        <div className="container products-detail">
-          {products.map((p) => (
-            <article key={p.id} className="product-detail">
-              <div>
-                <h2>{t(p.title)}</h2>
-                <p>{t(p.desc)}</p>
-                <p className="muted">{t(p.catalogHint)}</p>
-                {p.samplePrice ? (
-                  <p className="price">{t(p.samplePrice)}</p>
-                ) : null}
-                <a
-                  className="btn btn-primary"
-                  href={company.catalogUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {t(labels.viewCatalog)}
-                </a>
-              </div>
-              <ul>
-                {t(p.highlights).map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
+      <div className="panel">
+        <DataTable columns={columns} rows={rows} empty={t('noData')} />
+      </div>
+    </div>
   )
 }
