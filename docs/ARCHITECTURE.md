@@ -13,7 +13,7 @@ src/
 
 ### Dependency rules
 
-1. `features/*` may import from `shared` and `app/config` / public app hooks.
+1. `features/*` may import from `shared` and `app/config` / public app hooks (`@app/providers`, `@app/router/navigation`).
 2. Features must **not** import internal files from other features.
 3. `shared` must not import from `features`.
 4. Domain code (`features/*/domain`) must not import React or infrastructure.
@@ -48,6 +48,15 @@ Simple list screens may keep only `presentation/` and read shared seed/API servi
 
 `quality` is reserved for a future module — not scaffolded empty.
 
-### Subdomain routing
+### Routing & permissions
 
-One build serves all hosts. Hostname → module mapping lives in `src/app/config/domains.js` and is resolved in `src/app/router/subdomain.js`. Authorization (roles) is independent of hostname scoping.
+One build, one origin (`app.<domain>`). Modules are URL paths
+(`/sales/orders`, `/finance/overview`, …) and every page requires one permission
+key (`<module>.<resource>.<action>`). Users may hold several roles; the sidebar,
+routes and widgets all derive from the merged permission list.
+
+- Each feature declares its pages in `features/<name>/module.js`
+- `app/config/modules.js` registers them; router + sidebar are generated from it
+- The hostname is never read by the app
+
+Full details: [ROUTING_AND_PERMISSIONS.md](ROUTING_AND_PERMISSIONS.md) · domain strategy: [DOMAINS.md](DOMAINS.md)

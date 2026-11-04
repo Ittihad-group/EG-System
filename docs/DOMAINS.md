@@ -1,44 +1,60 @@
-# Domains & subdomain routing
+# Domains
 
-## Goal
+## Decision
 
-Serve **one** React build on multiple hostnames and scope the shell to the relevant ERP module.
+The ERP runs on **one hostname**. Modules are paths (`/sales`, `/finance`, …),
+not subdomains. Subdomains are reserved for things with a **different audience,
+deployment or security boundary**.
 
-## Example hosts
+| Host | What | Repo |
+|------|------|------|
+| `www.<domain>` | Public marketing website (SEO) | `EG-public-Website` |
+| `app.<domain>` | The ERP (this repo) — all modules | `EG-System` |
+| `api.<domain>` | Backend API (web + `EG-Mobile`) | external |
+| `admin.<domain>` | *(optional, later)* back-office with stricter security | — |
 
-| Host | Module |
-|------|--------|
-| `app.abc.com` | Full ERP |
-| `sales.abc.com` | Sales-focused |
-| `production.abc.com` | Production-focused |
-| `warehouse.abc.com` | Inventory / warehouse |
-| `finance.abc.com` | Finance-focused |
-| `hr.abc.com` | HR-focused |
+### Why not `sales.<domain>`, `finance.<domain>`, …
 
-Replace `abc.com` with your real base domain via `VITE_BASE_DOMAIN`.
+- Each subdomain is a separate browser origin: `localStorage` and in-memory
+  sessions aren't shared, so users would sign in per module and every module
+  switch is a full reload.
+- Users who work across modules (accountant + purchasing, plant manager, admins)
+  are common in an ERP; they need one session and one sidebar.
+- The same page would end up reachable at several URLs, which breaks shared
+  links and bookmarks.
+- Access is a **permission** concern, not a hostname concern. See
+  [ROUTING_AND_PERMISSIONS.md](ROUTING_AND_PERMISSIONS.md).
 
-## Configuration
+## Optional: friendly module hostnames
 
-- `VITE_BASE_DOMAIN` — base domain without protocol (e.g. `abc.com` or `localhost`)
-- Mapping tables: `src/app/config/domains.js`
-- Resolver: `src/app/router/subdomain.js`
+If staff want to type `sales.<domain>`, add **redirects at the reverse proxy**
+(the app itself never reads the hostname):
+
+```nginx
+# Reverse proxy in front of the app (needs DNS + TLS for these names)
+server {
+    listen 443 ssl;
+    server_name ~^(?<mod>sales|inventory|production|purchasing|finance|hr)\.example\.com$;
+    return 301 https://app.example.com/$mod;
+}
+```
+
+## Future-proofing for multi-company
+
+The system is single-plant today. To keep adding companies/plants cheap later:
+
+**Frontend (already in place)**
+
+- All URLs come from `PATHS`; child routes are relative → adding `/:company` is local.
+- All API calls go through `@shared/services/apiClient` → one place to send the company.
+
+**Backend (do this from day one — this is the expensive part to retrofit)**
+
+- Put `company_id` (and `plant_id` where relevant) on every business table,
+  even while there is only one row.
+- Scope every query by it.
+- Keep the `/me` permissions shape extendable to per-company permissions.
 
 ## Local development
 
-- Default `localhost` → full `app` module
-- Optional: `sales.localhost:5173` (browsers that resolve `*.localhost` to loopback)
-
-```bash
-cp .env.example .env
-# VITE_BASE_DOMAIN=localhost
-npm run dev
-```
-
-## Auth vs hostname
-
-Hostname routing only filters navigation and default home path.  
-Login / roles / permissions remain separate and must still be enforced by the product/API.
-
-## DNS (manual ops)
-
-Point each subdomain A/AAAA (or CNAME) at the same frontend origin. TLS is terminated by the hosting layer.
+`npm run dev` → `http://localhost:5173`. No hosts-file or subdomain setup needed.

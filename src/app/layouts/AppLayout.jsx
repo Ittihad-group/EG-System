@@ -1,19 +1,29 @@
-import { useState } from 'react'
-import { NavLink, Navigate, Outlet } from 'react-router-dom'
+import { Suspense, useState } from 'react'
+import { NavLink, Outlet } from 'react-router-dom'
+import { PATHS } from '@app/config/paths'
+import PageFallback from '@app/pages/PageFallback'
 import { useApp } from '@app/providers'
-import { getNavForModule, isPathAllowedForModule, getModuleHomePath } from '@app/router/subdomain'
+import { buildNavigation } from '@app/router/navigation'
 
+function NavItem({ to, icon, label, onNavigate }) {
+  return (
+    <NavLink to={to} end={to === PATHS.dashboard} onClick={onNavigate}>
+      {icon ? (
+        <span className="nav-ico" aria-hidden>
+          {icon}
+        </span>
+      ) : null}
+      {label}
+    </NavLink>
+  )
+}
+
+/** Authenticated shell. Auth is enforced by `RequireAuth` in the router. */
 export default function AppLayout() {
-  const { user, logout, t, toggleLang, lang, data, activeModule } = useApp()
+  const { user, logout, t, toggleLang, lang, data, can } = useApp()
   const [open, setOpen] = useState(false)
-  const nav = getNavForModule(activeModule)
-
-  if (!user) return <Navigate to="/login" replace />
-
-  const currentPath = window.location.pathname
-  if (!isPathAllowedForModule(currentPath, activeModule)) {
-    return <Navigate to={getModuleHomePath(activeModule)} replace />
-  }
+  const nav = buildNavigation(can)
+  const close = () => setOpen(false)
 
   return (
     <div className="erp-shell">
@@ -26,19 +36,34 @@ export default function AppLayout() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          {nav.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              onClick={() => setOpen(false)}
-            >
-              <span className="nav-ico" aria-hidden>
-                {item.icon}
-              </span>
-              {t(item.key)}
-            </NavLink>
-          ))}
+          {nav.map((mod) =>
+            mod.pages.length === 1 ? (
+              <NavItem
+                key={mod.id}
+                to={mod.pages[0].path}
+                icon={mod.icon}
+                label={t(mod.labelKey)}
+                onNavigate={close}
+              />
+            ) : (
+              <div key={mod.id} className="nav-group">
+                <span className="nav-group-title">
+                  <span className="nav-ico" aria-hidden>
+                    {mod.icon}
+                  </span>
+                  {t(mod.labelKey)}
+                </span>
+                {mod.pages.map((page) => (
+                  <NavItem
+                    key={page.id}
+                    to={page.path}
+                    label={t(page.labelKey)}
+                    onNavigate={close}
+                  />
+                ))}
+              </div>
+            ),
+          )}
         </nav>
         <div className="sidebar-foot">
           <p>{t(data.company.plant)}</p>
@@ -67,11 +92,13 @@ export default function AppLayout() {
           </div>
         </header>
         <div className="content">
-          <Outlet />
+          <Suspense fallback={<PageFallback />}>
+            <Outlet />
+          </Suspense>
         </div>
       </div>
       {open ? (
-        <button type="button" className="backdrop" onClick={() => setOpen(false)} aria-label="Close" />
+        <button type="button" className="backdrop" onClick={close} aria-label="Close" />
       ) : null}
     </div>
   )

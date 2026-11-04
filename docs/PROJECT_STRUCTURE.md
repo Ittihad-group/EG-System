@@ -4,12 +4,16 @@
 EG-System/
 ├── src/
 │   ├── app/                 # App shell & composition
-│   │   ├── router/          # Routes, subdomain resolution
-│   │   ├── providers/       # React context providers
+│   │   ├── router/          # Routes built from modules, guards, sidebar model
+│   │   ├── providers/       # React context providers (session, can(), i18n)
 │   │   ├── layouts/         # Authenticated shell layout
-│   │   └── config/          # env, domains, navigation
+│   │   ├── pages/           # Shell pages: 403, 404, loading
+│   │   └── config/          # env, paths, permissions, module registry
 │   ├── features/            # ERP modules (feature-based)
+│   │   ├── <name>/module.js # Module manifest: pages, URLs, permissions
+│   │   └── auth/data/       # authService → demo / api (cookie) auth sources
 │   ├── shared/              # Cross-cutting UI & utilities
+│   │   ├── auth/            # Pure permission matching
 │   │   ├── components/
 │   │   ├── hooks/
 │   │   ├── services/        # seed data + API client
@@ -37,7 +41,7 @@ EG-System/
 
 | Path | Responsibility |
 |------|----------------|
-| `src/app` | Bootstrap, routing, layout, hostname config |
+| `src/app` | Bootstrap, routing, layout, URL + permission config |
 | `src/features/*` | Module-owned pages and domain logic |
 | `src/shared` | Reusable primitives shared by features |
 | `docs` | Human documentation |

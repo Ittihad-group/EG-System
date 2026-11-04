@@ -179,6 +179,11 @@ code {
   color: #fff;
 }
 
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 .btn.ghost,
 .ghost-btn {
   background: transparent;
@@ -256,6 +261,28 @@ html[dir='ltr'] .sidebar-nav a.active {
   width: 1.2rem;
   text-align: center;
   opacity: 0.85;
+}
+
+.nav-group {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.35rem;
+}
+
+.nav-group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.8rem 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-group a {
+  padding-inline-start: 2.65rem;
+  font-size: 0.9rem;
 }
 
 .sidebar-foot {
@@ -700,4 +727,30 @@ html[dir='ltr'] .sidebar-nav a.active {
   padding: 2rem;
   text-align: center;
   opacity: 0.7;
+}
+
+.status-page {
+  max-width: 32rem;
+  margin: 3rem auto;
+  padding: 2rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.status-page h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.status-page p {
+  margin: 0 0 0.6rem;
+}
+
+.status-code {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
 }

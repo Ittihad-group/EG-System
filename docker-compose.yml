@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_BASE_DOMAIN: ${VITE_BASE_DOMAIN:-localhost}
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_AUTH_MODE: ${VITE_AUTH_MODE:-demo}
         VITE_APP_ENV: ${VITE_APP_ENV:-production}
     image: eg-system-web:latest
     ports:

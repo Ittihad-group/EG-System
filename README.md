@@ -20,10 +20,13 @@ npm run lint
 
 ## Demo login
 
-```
-admin@egerman-upvc.com / admin123
-sales@egerman-upvc.com / sales123
-```
+Default `VITE_AUTH_MODE=demo` (no backend needed). Real deployments use `api`.
+
+| User | Password | Roles | Sees |
+|------|----------|-------|------|
+| `admin@egerman-upvc.com` | `admin123` | admin | everything |
+| `sales@egerman-upvc.com` | `sales123` | sales_manager | sales + products/stock |
+| `accounts@egerman-upvc.com` | `accounts123` | accountant + purchasing_officer | finance + purchasing + stock |
 
 ## Architecture
 
@@ -39,6 +42,7 @@ See:
 - [docs/FEATURE_DEVELOPMENT.md](docs/FEATURE_DEVELOPMENT.md)
 - [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md)
 - [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
+- [docs/ROUTING_AND_PERMISSIONS.md](docs/ROUTING_AND_PERMISSIONS.md)
 - [docs/DOMAINS.md](docs/DOMAINS.md)
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
@@ -48,17 +52,20 @@ See:
 |--------|--------|
 | Auth | `/login` |
 | Dashboard | `/` |
-| Inventory / Products | `/inventory`, `/products` |
-| Sales / Customers | `/sales`, `/customers` |
-| Production | `/production` |
-| Purchasing | `/purchases`, `/suppliers` |
-| Finance | `/finance` |
-| HR | `/hr` |
-| Users / Settings | `/settings` |
+| Sales | `/sales/orders`, `/sales/customers` |
+| Inventory | `/inventory/stock`, `/inventory/products` |
+| Production | `/production/work-orders` |
+| Purchasing | `/purchasing/orders`, `/purchasing/suppliers` |
+| Finance | `/finance/overview` |
+| HR | `/hr/employees` |
+| Settings | `/settings/general` |
 
-## Subdomains
+## URLs & access
 
-Same build on `app.`, `sales.`, `production.`, `warehouse.`, `finance.`, `hr.` + `VITE_BASE_DOMAIN`.
+One app on one host (`app.<domain>`); modules are paths, not subdomains.
+Every page needs a permission (`sales.orders.read`, …); users can hold several
+roles and see all their modules in one sidebar. See
+[docs/ROUTING_AND_PERMISSIONS.md](docs/ROUTING_AND_PERMISSIONS.md).
 
 ## Docker (frontend only)
 

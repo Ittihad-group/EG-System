@@ -7,7 +7,7 @@
 | Components / pages | PascalCase | `SalesPage.jsx` |
 | Hooks | `use` + camelCase | `useApp.js` |
 | Usecases | verb camelCase | `calculateOrderTotal.js` |
-| Config modules | camelCase | `domains.js` |
+| Config modules | camelCase | `paths.js` |
 | CSS classes | kebab / BEM-ish existing | `.stat-card` |
 
 ## Imports

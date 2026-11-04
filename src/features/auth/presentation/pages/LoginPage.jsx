@@ -1,21 +1,37 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
+import PageFallback from '@app/pages/PageFallback'
 import { useApp } from '@app/providers'
-import { getModuleHomePath } from '@app/router/subdomain'
+import { getHomePath } from '@app/router/navigation'
 
 export default function LoginPage() {
-  const { user, login, t, data, lang, toggleLang, activeModule } = useApp()
-  const [email, setEmail] = useState('admin@egerman-upvc.com')
-  const [password, setPassword] = useState('admin123')
+  const { user, authStatus, authMode, login, t, data, lang, toggleLang, can } = useApp()
+  const location = useLocation()
+  const isDemo = authMode === 'demo'
+  const [email, setEmail] = useState(isDemo ? 'admin@egerman-upvc.com' : '')
+  const [password, setPassword] = useState(isDemo ? 'admin123' : '')
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  if (user) return <Navigate to={getModuleHomePath(activeModule)} replace />
+  if (authStatus === 'loading') return <PageFallback />
 
-  const onSubmit = (e) => {
+  // Back to the page the user originally opened (deep link), else their home.
+  if (user) {
+    const from = location.state?.from
+    const target = from
+      ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
+      : getHomePath(can)
+    return <Navigate to={target} replace />
+  }
+
+  const onSubmit = async (e) => {
     e.preventDefault()
-    const res = login(email.trim(), password)
+    setSubmitting(true)
+    setError('')
+    const res = await login(email.trim(), password)
     if (!res.ok) {
-      setError(lang === 'ar' ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials')
+      setError(t(res.reason === 'invalid_credentials' ? 'loginInvalid' : 'loginUnavailable'))
+      setSubmitting(false)
     }
   }
 
@@ -33,7 +49,13 @@ export default function LoginPage() {
           <p className="muted">{t('welcome')}</p>
           <label>
             {t('email')}
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              autoComplete="username"
+              required
+            />
           </label>
           <label>
             {t('password')}
@@ -41,14 +63,19 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
+              autoComplete="current-password"
               required
             />
           </label>
-          {error ? <p className="form-error">{error}</p> : null}
-          <button type="submit" className="btn primary">
+          {error ? (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <button type="submit" className="btn primary" disabled={submitting}>
             {t('login')}
           </button>
-          <p className="demo-hint">{t('demoHint')}</p>
+          {isDemo ? <p className="demo-hint">{t('demoHint')}</p> : null}
           <button type="button" className="ghost-btn" onClick={toggleLang}>
             {lang === 'ar' ? 'English' : 'العربية'}
           </button>

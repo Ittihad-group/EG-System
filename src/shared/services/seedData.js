@@ -21,20 +21,53 @@ export const company = {
   hours: { ar: '9ص – 5م', en: '9am – 5pm' },
 }
 
+/**
+ * Roles = named bundles of permission keys (`<module>.<resource>.<action>`).
+ * Prototype only: in production the backend owns roles and returns the
+ * resolved permission list from `/me`.
+ */
+export const roles = {
+  admin: {
+    name: { ar: 'مدير النظام', en: 'Administrator' },
+    permissions: ['*'],
+  },
+  sales_manager: {
+    name: { ar: 'مدير مبيعات', en: 'Sales manager' },
+    permissions: ['dashboard.view', 'sales.*', 'inventory.products.read', 'inventory.stock.read'],
+  },
+  accountant: {
+    name: { ar: 'محاسب', en: 'Accountant' },
+    permissions: ['dashboard.view', 'finance.*'],
+  },
+  purchasing_officer: {
+    name: { ar: 'مسؤول مشتريات', en: 'Purchasing officer' },
+    permissions: ['dashboard.view', 'purchasing.*', 'inventory.stock.read'],
+  },
+}
+
+/** A user can hold several roles; their permissions are merged. */
 export const users = [
   {
     id: 'u1',
     name: { ar: 'مدير النظام', en: 'System Admin' },
     email: 'admin@egerman-upvc.com',
     password: 'admin123',
-    role: 'admin',
+    roles: ['admin'],
   },
   {
     id: 'u2',
     name: { ar: 'مدير المبيعات', en: 'Sales Manager' },
     email: 'sales@egerman-upvc.com',
     password: 'sales123',
-    role: 'sales',
+    roles: ['sales_manager'],
+  },
+  {
+    id: 'u3',
+    name: { ar: 'المحاسب', en: 'Accountant' },
+    email: 'accounts@egerman-upvc.com',
+    password: 'accounts123',
+    // Multi-module user: finance + purchasing in one session, one sidebar.
+    roles: ['accountant', 'purchasing_officer'],
   },
 ]
 
@@ -413,10 +446,15 @@ export const financeSummary = {
   vatRate: 0.14,
 }
 
+/**
+ * Activity feed. Each event carries the permission needed to see it.
+ * The backend must return only events the user may see; the UI filters again.
+ */
 export const activity = [
   {
     id: 'a1',
     type: 'sales',
+    permission: 'sales.orders.read',
     text: {
       ar: 'تأكيد أمر بيع SO-2025-0142 لموزع الدقهلية',
       en: 'Confirmed sales order SO-2025-0142 for Dakahlia dealer',
@@ -426,6 +464,7 @@ export const activity = [
   {
     id: 'a2',
     type: 'production',
+    permission: 'production.work-orders.read',
     text: {
       ar: 'تقدم أمر تشغيل WO-2025-0088 إلى 55%',
       en: 'Work order WO-2025-0088 progressed to 55%',
@@ -435,6 +474,7 @@ export const activity = [
   {
     id: 'a3',
     type: 'inventory',
+    permission: 'inventory.stock.read',
     text: {
       ar: 'صرف 12 باب D134 من مخزن المنتجات التامة',
       en: 'Issued 12× D134 doors from finished goods',
@@ -444,6 +484,7 @@ export const activity = [
   {
     id: 'a4',
     type: 'purchase',
+    permission: 'purchasing.orders.read',
     text: {
       ar: 'إنشاء أمر شراء PO-2025-0032 لإكسسوارات الأبواب',
       en: 'Created purchase order PO-2025-0032 for door accessories',
